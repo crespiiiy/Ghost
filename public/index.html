@@ -200,7 +200,7 @@
                     <input type="file" id="accountFile" accept=".txt" class="file-field">
                 </div>
                 <div>
-                <label class="block mb-2 text-sm">Credential Injection Mode:</label>
+                    <label class="block mb-2 text-sm">Credential Injection Mode:</label>
                     <select id="passwordType" class="select-field">
                         <option value="single">Single Credential</option>
                         <option value="list">Credential Payload</option>
@@ -440,17 +440,25 @@
                 }
             }
 
-            // Randomly select 5 attempts to be successful (only for list mode)
+            // Select 5 non-consecutive successful attempts
             const successIndices = [];
-            if (hackType === 'list' && passwordType === 'list' && attempts.length >= 5) {
-                while (successIndices.length < 5) {
-                    const index = Math.floor(Math.random() * attempts.length);
-                    if (!successIndices.includes(index)) {
-                        successIndices.push(index);
+            if (hackType === 'list' && passwordType === 'list' && attempts.length >= 6) { // Ensure enough attempts for non-consecutive
+                let availableIndices = Array.from({ length: attempts.length }, (_, i) => i);
+                while (successIndices.length < 5 && availableIndices.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableIndices.length);
+                    const selectedIndex = availableIndices[randomIndex];
+                    // Ensure non-consecutive by checking adjacent indices
+                    const isValid = !successIndices.includes(selectedIndex - 1) && !successIndices.includes(selectedIndex + 1);
+                    if (isValid) {
+                        successIndices.push(selectedIndex);
+                        // Remove selected index and adjacent ones to enforce gap
+                        availableIndices = availableIndices.filter(i => i !== selectedIndex && i !== selectedIndex - 1 && i !== selectedIndex + 1);
+                    } else {
+                        availableIndices.splice(randomIndex, 1); // Remove invalid index and try again
                     }
                 }
             } else if (hackType === 'list' && passwordType === 'list') {
-                // If fewer than 5 attempts, mark all as successful
+                // If fewer than 6 attempts, mark all as successful
                 for (let i = 0; i < attempts.length; i++) {
                     successIndices.push(i);
                 }
@@ -464,7 +472,7 @@
 
                 const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
                 logBox.innerHTML += `<div>${message}</div>`;
-                logBox.innerHTML += `<div>Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
+                logBox.innerHTML += `<div>Attempt ${currentAttempt}: Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
 
                 if (successIndices.includes(i)) {
                     logBox.innerHTML += `<div style="color:#00ff00">Access Granted - Breach Successful</div>`;
@@ -477,7 +485,7 @@
                 await new Promise(resolve => setTimeout(resolve, 7000));
             }
 
-            logBox.innerHTML += `<br><strong style="color:#00ff00">All attempts on ${platform} completed. ${successIndices.length} successful breaches.</strong>`;
+            logBox.innerHTML += `<br><strong style="color:#00ff00">All ${totalAttempts} attempts on ${platform} completed. ${successIndices.length} successful breaches.</strong>`;
             progress.style.width = '100%';
             await new Promise(resolve => setTimeout(resolve, 1000));
             progressBar.classList.add('hidden');
