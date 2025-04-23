@@ -306,8 +306,8 @@
                                '<p style="color:#ff3333; font-size:1.2rem;">Establishing dark net tunnel...</p>';
             document.body.appendChild(endDiv);
             setTimeout(() => {
-                endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem;">[ DATA EXFILTRATION FAILED ]</h1>' +
-                                   '<p style="color:#ff3333; margin-top:1rem;">TRACE DETECTED - Session Terminated</p>';
+                endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem;">[ DATA EXFILTRATION COMPLETED ]</h1>' +
+                                   '<p style="color:#ff3333; margin-top:1rem;">5 ACCOUNTS BREACHED - Session Terminated</p>';
             }, 4000);
         }
 
@@ -380,23 +380,52 @@
             const totalAttempts = accounts.length * passwords.length;
             let currentAttempt = 0;
 
+            // Generate list of all attempts
+            const attempts = [];
             for (const account of accounts) {
                 for (const password of passwords) {
-                    currentAttempt++;
-                    const progressPercentage = (currentAttempt / totalAttempts) * 100;
-                    progress.style.width = `${progressPercentage}%`;
-
-                    const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
-                    logBox.innerHTML += `<div>${message}</div>`;
-                    logBox.innerHTML += `<div>Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
-                    logBox.innerHTML += `<div style="color:#ff3333">Access Denied - Retry Failed</div><hr style="margin: 5px 0;">`;
-                    logBox.scrollTop = logBox.scrollHeight;
-
-                    await new Promise(resolve => setTimeout(resolve, 7000));
+                    attempts.push({ account, password });
                 }
             }
 
-            logBox.innerHTML += `<br><strong style="color:#ff3333">All attempts on ${platform} are completed. No successful breach.</strong>`;
+            // Randomly select 5 attempts to be successful
+            const successIndices = [];
+            if (attempts.length >= 5) {
+                while (successIndices.length < 5) {
+                    const index = Math.floor(Math.random() * attempts.length);
+                    if (!successIndices.includes(index)) {
+                        successIndices.push(index);
+                    }
+                }
+            } else {
+                // If fewer than 5 attempts, mark all as successful
+                for (let i = 0; i < attempts.length; i++) {
+                    successIndices.push(i);
+                }
+            }
+
+            for (let i = 0; i < attempts.length; i++) {
+                const { account, password } = attempts[i];
+                currentAttempt++;
+                const progressPercentage = (currentAttempt / totalAttempts) * 100;
+                progress.style.width = `${progressPercentage}%`;
+
+                const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
+                logBox.innerHTML += `<div>${message}</div>`;
+                logBox.innerHTML += `<div>Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
+
+                if (successIndices.includes(i)) {
+                    logBox.innerHTML += `<div style="color:#00ff00">Access Granted - Breach Successful</div>`;
+                } else {
+                    logBox.innerHTML += `<div style="color:#ff3333">Access Denied - Retry Failed</div>`;
+                }
+                logBox.innerHTML += `<hr style="margin: 5px 0;">`;
+                logBox.scrollTop = logBox.scrollHeight;
+
+                await new Promise(resolve => setTimeout(resolve, 7000));
+            }
+
+            logBox.innerHTML += `<br><strong style="color:#00ff00">All attempts on ${platform} completed. 5 successful breaches.</strong>`;
             progress.style.width = '100%';
             await new Promise(resolve => setTimeout(resolve, 1000));
             progressBar.classList.add('hidden');
