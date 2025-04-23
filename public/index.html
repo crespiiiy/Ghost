@@ -1,343 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тёмная Сеть: Призрачный Взлом</title>
-  <script src="https://cdn.tailwindcss.com">  document.getElementById('hackType').addEventListener('change', function () {
-    const singleAccount = document.getElementById('singleAccount');
-    const accountList = document.getElementById('accountList');
-    singleAccount.classList.add('hidden');
-    accountList.classList.add('hidden');
-    if (this.value === 'single') {
-      singleAccount.classList.remove('hidden');
-    } else {
-      accountList.classList.remove('hidden');
-    }
-  });
-
-  document.getElementById('passwordType').addEventListener('change', function () {
-    const singlePassword = document.getElementById('singlePassword');
-    const passwordList = document.getElementById('passwordList');
-    singlePassword.classList.add('hidden');
-    passwordList.classList.add('hidden');
-    if (this.value === 'single') {
-      singlePassword.classList.remove('hidden');
-    } else {
-      passwordList.classList.remove('hidden');
-    }
-  });
-
-  const platformMessages = {
-    facebook: ['Bypassing Facebook OAuth2...', 'Scanning Graph API endpoints...', 'Faking session cookie...', 'Attempting FBID hash injection...'],
-    instagram: ['Penetrating Instagram API gateway...', 'Bypassing 2FA...', 'Scanning IG media endpoints...', 'Simulating session hijack...'],
-    twitter: ['Breaching Twitter API v2...', 'Faking OAuth tokens...', 'Scanning tweet endpoints...', 'Attempting credential injection...'],
-    tiktok: ['Accessing TikTok CDN servers...', 'Bypassing device ID...', 'Scanning video API...', 'Simulating brute-force attack...'],
-    snapchat: ['Bypassing Snapchat SCAPI...', 'Faking snap token...', 'Scanning story endpoints...', 'Attempting access escalation...'],
-    pubg: ['Breaching PUBG game servers...', 'Bypassing BattlEye...', 'Scanning player UID...', 'Simulating account takeover...']
-  };
-
-  document.getElementById('runButton').addEventListener('click', async function () {
-    const logBox = document.getElementById('logBox');
-    const progressBar = document.getElementById('progressBar');
-    const progress = document.getElementById('progress');
-    const runButton = this;
-
-    logBox.innerHTML = '';
-    progress.style.width = '0%';
-    progressBar.classList.remove('hidden');
-    runButton.disabled = true;
-
-    const platform = document.getElementById('platform').value;
-    const hackType = document.getElementById('hackType').value;
-    const passwordType = document.getElementById('passwordType').value;
-
-    let accounts = [], passwords = [];
-
-    if (hackType === 'single') {
-      const account = document.getElementById('accountInput').value.trim();
-      if (!account) {
-        alert('Please enter a target account.');
-        runButton.disabled = false;
-        progressBar.classList.add('hidden');
-        return;
-      }
-      accounts.push(account);
-    } else {
-      const file = document.getElementById('accountFile').files[0];
-      if (!file) {
-        alert('Please upload a target payload file (.txt).');
-        runButton.disabled = false;
-        progressBar.classList.add('hidden');
-        return;
-      }
-      const text = await file.text();
-      accounts = text.split(/
-?
-/).map(line => line.trim()).filter(Boolean);
-    }
-
-    if (passwordType === 'single') {
-      const password = document.getElementById('passwordInput').value.trim();
-      if (!password) {
-        alert('Please enter a credential.');
-        runButton.disabled = false;
-        progressBar.classList.add('hidden');
-        return;
-      }
-      passwords.push(password);
-    } else {
-      const file = document.getElementById('passwordFile').files[0];
-      if (!file) {
-        alert('Please upload a credential payload file (.txt).');
-        runButton.disabled = false;
-        progressBar.classList.add('hidden');
-        return;
-      }
-      const text = await file.text();
-      passwords = text.split(/
-?
-/).map(line => line.trim()).filter(Boolean);
-    }
-
-    const totalAttempts = accounts.length * passwords.length;
-    let currentAttempt = 0;
-
-    for (const account of accounts) {
-      for (const password of passwords) {
-        currentAttempt++;
-        const progressPercentage = (currentAttempt / totalAttempts) * 100;
-        progress.style.width = `${progressPercentage}%`;
-
-        const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
-        logBox.innerHTML += `<div>${message}</div>`;
-        logBox.innerHTML += `<div>Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
-        logBox.innerHTML += `<div style="color:#ff3333">Access Denied - Retry Failed</div><hr style="margin: 5px 0;">`;
-        logBox.scrollTop = logBox.scrollHeight;
-
-        await new Promise(resolve => setTimeout(resolve, 7000));
-      }
-    }
-
-    logBox.innerHTML += `<br><strong style="color:#ff3333">All attempts on ${platform} are completed. No successful breach.</strong>`;
-    progress.style.width = '100%';
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    progressBar.classList.add('hidden');
-    runButton.disabled = false;
-  });
-</script>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background: #000 url('https://www.transparenttextures.com/patterns/asfalt-light.png');
-      color: #0f0;
-      font-family: 'Share Tech Mono', monospace;
-      overflow: hidden;
-      margin: 0;
-    }
-    .terminal {
-      background: rgba(5, 5, 5, 0.92);
-      border: 3px solid #00ff00cc;
-      border-radius: 16px;
-      padding: 40px;
-      max-width: 950px;
-      margin: 40px auto;
-      box-shadow: 0 0 60px rgba(0, 255, 0, 0.6), inset 0 0 20px rgba(0, 255, 0, 0.4);
-      backdrop-filter: blur(6px);
-    }
-    .logo {
-      display: block;
-      margin: 0 auto 30px;
-      width: 160px;
-      filter: drop-shadow(0 0 20px #0f0);
-      animation: flicker 2.5s infinite alternate;
-    }
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 1;
-      }
-      20%, 22%, 55% {
-        opacity: 0.3;
-      }
-    }
-    .scan-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: rgba(0, 255, 0, 0.2);
-      animation: scan 4s linear infinite;
-      z-index: 0;
-    }
-    @keyframes scan {
-      0% { top: 0; }
-      100% { top: 100%; }
-    }
-    .input-field, .select-field, .file-field {
-      background: #101010;
-      border: 1px solid #0f0;
-      padding: 12px;
-      border-radius: 6px;
-      width: 100%;
-      color: #0f0;
-      font-size: 0.95rem;
-      transition: all 0.3s;
-    }
-    .input-field:focus, .select-field:focus, .file-field:focus {
-      outline: none;
-      box-shadow: 0 0 15px #00ff00;
-      border-color: #33ff33;
-    }
-    .run-button {
-      background: #0f0;
-      color: #000;
-      font-weight: bold;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      width: 100%;
-      transition: all 0.3s;
-      text-transform: uppercase;
-    }
-    .run-button:hover {
-      background: #33ff33;
-      box-shadow: 0 0 18px #00ff00;
-    }
-    .log-box {
-      background: #000;
-      border: 2px solid #00ff00;
-      border-radius: 10px;
-      height: 280px;
-      overflow-y: auto;
-      padding: 16px;
-      font-size: 13px;
-      box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.4);
-    }
-    .log-box::-webkit-scrollbar {
-      width: 8px;
-    }
-    .log-box::-webkit-scrollbar-thumb {
-      background: #00ff00;
-      border-radius: 4px;
-    }
-    .glitch-title {
-      font-size: 2.5rem;
-      color: #0f0;
-      text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
-      animation: glitch-flicker 1s infinite;
-    }
-    @keyframes glitch-flicker {
-      0% { opacity: 1; }
-      20% { opacity: 0.85; }
-      40% { opacity: 1; }
-      60% { opacity: 0.6; }
-      80% { opacity: 1; }
-      100% { opacity: 0.9; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тёмная Сеть: Призрачный Взлом</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #000 url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .terminal {
+            background: rgba(5, 5, 5, 0.92);
+            border: 3px solid #00ff00cc;
+            border-radius: 16px;
+            padding: 4vw;
+            max-width: 90vw;
+            margin: 5vw auto;
+            box-shadow: 0 0 60px rgba(0, 255, 0, 0.6), inset 0 0 20px rgba(0, 255, 0, 0.4);
+            backdrop-filter: blur(6px);
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 5vw;
+            width: 30vw;
+            max-width: 160px;
+            filter: drop-shadow(0 0 20px #0f0);
+            animation: flicker 2.5s infinite alternate;
+        }
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 22%, 55% { opacity: 0.3; }
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 255, 0, 0.2);
+            animation: scan 4s linear infinite;
+            z-index: 0;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        .input-field, .select-field, .file-field {
+            background: #101010;
+            border: 1px solid #0f0;
+            padding: 12px;
+            border-radius: 6px;
+            width: 100%;
+            color: #0f0;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .input-field:focus, .select-field:focus, .file-field:focus {
+            outline: none;
+            box-shadow: 0 0 15px #00ff00;
+            border-color: #33ff33;
+        }
+        .run-button {
+            background: #0f0;
+            color: #000;
+            font-weight: bold;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        .run-button:hover {
+            background: #33ff33;
+            box-shadow: 0 0 18px #00ff00;
+        }
+        .run-button:disabled {
+            background: #333;
+            cursor: not-allowed;
+            color: #666;
+        }
+        .log-box {
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            height: 50vw;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 0.8rem;
+            box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+        .log-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .log-box::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+        .glitch-title {
+            font-size: 2rem;
+            color: #0f0;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+            animation: glitch-flicker 1s infinite;
+        }
+        @keyframes glitch-flicker {
+            0% { opacity: 1; }
+            20% { opacity: 0.85; }
+            40% { opacity: 1; }
+            60% { opacity: 0.6; }
+            80% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        .progress-bar {
+            height: 12px;
+            background: #000;
+            border: 1px solid #00ff00;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress {
+            height: 100%;
+            background: #00ff00;
+            width: 0;
+            transition: width 0.5s;
+        }
+        @media (max-width: 640px) {
+            .terminal {
+                padding: 3vw;
+                margin: 3vw auto;
+            }
+            .logo {
+                width: 25vw;
+            }
+            .glitch-title {
+                font-size: 1.5rem;
+            }
+            .input-field, .select-field, .file-field {
+                font-size: 0.8rem;
+                padding: 8px;
+            }
+            .run-button {
+                font-size: 0.8rem;
+                padding: 10px;
+            }
+            .log-box {
+                font-size: 0.7rem;
+                height: 60vw;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="scan-line"></div>
-  <div class="terminal">
-    <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="45" stroke="#0f0" stroke-width="5" fill="none"/>
-      <path d="M30 40 Q50 10 70 40 Q50 70 30 40" stroke="#ff3333" fill="none" stroke-width="3"/>
-      <circle cx="40" cy="45" r="3" fill="#ff3333"/>
-      <circle cx="60" cy="45" r="3" fill="#ff3333"/>
-    </svg>
-    <div class="text-center mb-8">
-      <h1 class="glitch-title">ТЁМНАЯ СЕТЬ: ПРИЗРАЧНЫЙ ВЗЛОМ</h1>
-    </div>
-    <div id="formContainer">
-  <div class="space-y-8">
-    <div>
-      <label class="block mb-2 text-sm">Target Platform:</label>
-      <select id="platform" class="select-field">
-        <option value="facebook">Facebook</option>
-        <option value="instagram">Instagram</option>
-        <option value="twitter">Twitter</option>
-        <option value="tiktok">TikTok</option>
-        <option value="snapchat">Snapchat</option>
-        <option value="pubg">PUBG</option>
-      </select>
-    </div>
-
-    <div>
-      <label class="block mb-2 text-sm">Select Intrusion Protocol:</label>
-      <select id="hackType" class="select-field">
-        <option value="single">Single Target Breach</option>
-        <option value="list">Multi-Target Payload</option>
-      </select>
-    </div>
-
-    <div id="singleAccount" class="hidden">
-      <label class="block mb-2 text-sm">Target Identifier (Email/ID):</label>
-      <input type="text" id="accountInput" class="input-field" placeholder="target@platform.com">
-    </div>
-
-    <div id="accountList" class="hidden">
-      <label class="block mb-2 text-sm">Upload Target Payload (.txt):</label>
-      <input type="file" id="accountFile" accept=".txt" class="file-field">
-    </div>
-
-    <div>
-      <label class="block mb-2 text-sm">Credential Injection Mode:</label>
-      <select id="passwordType" class="select-field">
-        <option value="single">Single Credential</option>
-        <option value="list">Credential Payload</option>
-      </select>
-    </div>
-
-    <div id="singlePassword" class="hidden">
-      <label class="block mb-2 text-sm">Inject Credential:</label>
-      <input type="text" id="passwordInput" class="input-field" placeholder="credential123">
-    </div>
-
-    <div id="passwordList" class="hidden">
-      <label class="block mb-2 text-sm">Upload Credential Payload (.txt):</label>
-      <input type="file" id="passwordFile" accept=".txt" class="file-field">
-    </div>
-
-    <div class="progress-bar hidden h-3 bg-black border border-green-500 rounded overflow-hidden mt-3" id="progressBar">
-      <div class="progress h-full bg-green-500" id="progress" style="width: 0%;"></div>
+    <div class="scan-line"></div>
+    <div class="terminal">
+        <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" stroke="#0f0" stroke-width="5" fill="none"/>
+            <path d="M30 40 Q50 10 70 40 Q50 70 30 40" stroke="#ff3333" fill="none" stroke-width="3"/>
+            <circle cx="40" cy="45" r="3" fill="#ff3333"/>
+            <circle cx="60" cy="45" r="3" fill="#ff3333"/>
+        </svg>
+        <div class="text-center mb-8">
+            <h1 class="glitch-title">ТЁМНАЯ СЕТЬ: ПРИЗРАЧНЫЙ ВЗЛОМ</h1>
+        </div>
+        <div id="formContainer">
+            <div class="space-y-8">
+                <div>
+                    <label class="block mb-2 text-sm">Target Platform:</label>
+                    <select id="platform" class="select-field">
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="twitter">Twitter</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="snapchat">Snapchat</option>
+                        <option value="pubg">PUBG</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm">Select Intrusion Protocol:</label>
+                    <select id="hackType" class="select-field">
+                        <option value="single">Single Target Breach</option>
+                        <option value="list">Multi-Target Payload</option>
+                    </select>
+                </div>
+                <div id="singleAccount" class="hidden">
+                    <label class="block mb-2 text-sm">Target Identifier (Email/ID):</label>
+                    <input type="text" id="accountInput" class="input-field" placeholder="target@platform.com">
+                </div>
+                <div id="accountList" class="hidden">
+                    <label class="block mb-2 text-sm">Upload Target Payload (.txt):</label>
+                    <input type="file" id="accountFile" accept=".txt" class="file-field">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm">Credential Injection Mode:</label>
+                    <select id="passwordType" class="select-field">
+                        <option value="single">Single Credential</option>
+                        <option value="list">Credential Payload</option>
+                    </select>
+                </div>
+                <div id="singlePassword" class="hidden">
+                    <label class="block mb-2 text-sm">Inject Credential:</label>
+                    <input type="text" id="passwordInput" class="input-field" placeholder="credential123">
+                </div>
+                <div id="passwordList" class="hidden">
+                    <label class="block mb-2 text-sm">Upload Credential Payload (.txt):</label>
+                    <input type="file" id="passwordFile" accept=".txt" class="file-field">
+                </div>
+                <div class="progress-bar hidden" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <button id="runButton" class="run-button mt-4" disabled>Начать атаку</button>
+                <div class="log-box mt-6" id="logBox"></div>
+            </div>
+        </div>
     </div>
 
-    <button id="runButton" class="run-button mt-4">Начать атаку</button>
-    <div class="log-box mt-6" id="logBox"></div>
-  </div>
-</div>
-  </div>
-  
-  <script>
-    // Fake sound effect and end screen
-    const audio = new Audio("https://cdn.pixabay.com/download/audio/2022/10/25/audio_b67be48161.mp3?filename=hacker-code-2-112199.mp3");
-    audio.volume = 0.4;
-    function showEndScreen() {
-      const endDiv = document.createElement('div');
-      Object.assign(endDiv.style, {
-        position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
-        background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexDirection: 'column', zIndex: '9999'
-      });
-      endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem; margin-bottom:1rem;">RETRIEVING ENCRYPTED DUMP...</h1>' +
-                         '<p style="color:#ff3333; font-size:1.2rem;">Establishing dark net tunnel...</p>';
-      document.body.appendChild(endDiv);
-      setTimeout(() => {
-        endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem;">[ DATA EXFILTRATION FAILED ]</h1>' +
-                           '<p style="color:#ff3333; margin-top:1rem;">TRACE DETECTED - Session Terminated</p>';
-      }, 4000);
-    }
-    document.getElementById('runButton')?.addEventListener('click', () => {
-      setTimeout(() => {
-        audio.play();
-        showEndScreen();
-      }, 3000);
-    });
-  </script>
+    <script>
+        // Toggle visibility based on hack type
+        document.getElementById('hackType').addEventListener('change', function () {
+            const singleAccount = document.getElementById('singleAccount');
+            const accountList = document.getElementById('accountList');
+            singleAccount.classList.add('hidden');
+            accountList.classList.add('hidden');
+            if (this.value === 'single') {
+                singleAccount.classList.remove('hidden');
+            } else {
+                accountList.classList.remove('hidden');
+            }
+            validateInputs();
+        });
+
+        // Toggle visibility based on password type
+        document.getElementById('passwordType').addEventListener('change', function () {
+            const singlePassword = document.getElementById('singlePassword');
+            const passwordList = document.getElementById('passwordList');
+            singlePassword.classList.add('hidden');
+            passwordList.classList.add('hidden');
+            if (this.value === 'single') {
+                singlePassword.classList.remove('hidden');
+            } else {
+                passwordList.classList.remove('hidden');
+            }
+            validateInputs();
+        });
+
+        // Input validation
+        function validateInputs() {
+            const hackType = document.getElementById('hackType').value;
+            const passwordType = document.getElementById('passwordType').value;
+            const accountInput = document.getElementById('accountInput').value.trim();
+            const accountFile = document.getElementById('accountFile').files[0];
+            const passwordInput = document.getElementById('passwordInput').value.trim();
+            const passwordFile = document.getElementById('passwordFile').files[0];
+            const runButton = document.getElementById('runButton');
+
+            let isValid = false;
+            if (hackType === 'single' && passwordType === 'single') {
+                isValid = accountInput && passwordInput;
+            } else if (hackType === 'single' && passwordType === 'list') {
+                isValid = accountInput && passwordFile;
+            } else if (hackType === 'list' && passwordType === 'single') {
+                isValid = accountFile && passwordInput;
+            } else if (hackType === 'list' && passwordType === 'list') {
+                isValid = accountFile && passwordFile;
+            }
+
+            runButton.disabled = !isValid;
+        }
+
+        // Add input listeners for validation
+        document.getElementById('accountInput').addEventListener('input', validateInputs);
+        document.getElementById('passwordInput').addEventListener('input', validateInputs);
+        document.getElementById('accountFile').addEventListener('change', validateInputs);
+        document.getElementById('passwordFile').addEventListener('change', validateInputs);
+
+        // Platform-specific log messages
+        const platformMessages = {
+            facebook: ['Bypassing Facebook OAuth2...', 'Scanning Graph API endpoints...', 'Faking session cookie...', 'Attempting FBID hash injection...'],
+            instagram: ['Penetrating Instagram API gateway...', 'Bypassing 2FA...', 'Scanning IG media endpoints...', 'Simulating session hijack...'],
+            twitter: ['Breaching Twitter API v2...', 'Faking OAuth tokens...', 'Scanning tweet endpoints...', 'Attempting credential injection...'],
+            tiktok: ['Accessing TikTok CDN servers...', 'Bypassing device ID...', 'Scanning video API...', 'Simulating brute-force attack...'],
+            snapchat: ['Bypassing Snapchat SCAPI...', 'Faking snap token...', 'Scanning story endpoints...', 'Attempting access escalation...'],
+            pubg: ['Breaching PUBG game servers...', 'Bypassing BattlEye...', 'Scanning player UID...', 'Simulating account takeover...']
+        };
+
+        // Fake sound effect and end screen
+        const audio = new Audio("https://cdn.pixabay.com/download/audio/2022/10/25/audio_b67be48161.mp3?filename=hacker-code-2-112199.mp3");
+        audio.volume = 0.4;
+        function showEndScreen() {
+            const endDiv = document.createElement('div');
+            Object.assign(endDiv.style, {
+                position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+                background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexDirection: 'column', zIndex: '9999'
+            });
+            endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem; margin-bottom:1rem;">RETRIEVING ENCRYPTED DUMP...</h1>' +
+                               '<p style="color:#ff3333; font-size:1.2rem;">Establishing dark net tunnel...</p>';
+            document.body.appendChild(endDiv);
+            setTimeout(() => {
+                endDiv.innerHTML = '<h1 style="color:#0f0; font-size:2rem;">[ DATA EXFILTRATION FAILED ]</h1>' +
+                                   '<p style="color:#ff3333; margin-top:1rem;">TRACE DETECTED - Session Terminated</p>';
+            }, 4000);
+        }
+
+        // Run button logic
+        document.getElementById('runButton').addEventListener('click', async function () {
+            const logBox = document.getElementById('logBox');
+            const progressBar = document.getElementById('progressBar');
+            const progress = document.getElementById('progress');
+            const runButton = this;
+
+            logBox.innerHTML = '';
+            progress.style.width = '0%';
+            progressBar.classList.remove('hidden');
+            runButton.disabled = true;
+
+            const platform = document.getElementById('platform').value;
+            const hackType = document.getElementById('hackType').value;
+            const passwordType = document.getElementById('passwordType').value;
+
+            let accounts = [], passwords = [];
+
+            if (hackType === 'single') {
+                const account = document.getElementById('accountInput').value.trim();
+                if (!account) {
+                    alert('Please enter a target account.');
+                    runButton.disabled = false;
+                    progressBar.classList.add('hidden');
+                    return;
+                }
+                accounts.push(account);
+            } else {
+                const file = document.getElementById('accountFile').files[0];
+                if (!file) {
+                    alert('Please upload a target payload file (.txt).');
+                    runButton.disabled = false;
+                    progressBar.classList.add('hidden');
+                    return;
+                }
+                const text = await file.text();
+                accounts = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            }
+
+            if (passwordType === 'single') {
+                const password = document.getElementById('passwordInput').value.trim();
+                if (!password) {
+                    alert('Please enter a credential.');
+                    runButton.disabled = false;
+                    progressBar.classList.add('hidden');
+                    return;
+                }
+                passwords.push(password);
+            } else {
+                const file = document.getElementById('passwordFile').files[0];
+                if (!file) {
+                    alert('Please upload a credential payload file (.txt).');
+                    runButton.disabled = false;
+                    progressBar.classList.add('hidden');
+                    return;
+                }
+                const text = await file.text();
+                passwords = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            }
+
+            // Trigger sound and end screen after 3 seconds
+            setTimeout(() => {
+                audio.play();
+                showEndScreen();
+            }, 3000);
+
+            const totalAttempts = accounts.length * passwords.length;
+            let currentAttempt = 0;
+
+            for (const account of accounts) {
+                for (const password of passwords) {
+                    currentAttempt++;
+                    const progressPercentage = (currentAttempt / totalAttempts) * 100;
+                    progress.style.width = `${progressPercentage}%`;
+
+                    const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
+                    logBox.innerHTML += `<div>${message}</div>`;
+                    logBox.innerHTML += `<div>Targeting <b>${account}</b> on <i>${platform}</i> with credential: <code>${password}</code></div>`;
+                    logBox.innerHTML += `<div style="color:#ff3333">Access Denied - Retry Failed</div><hr style="margin: 5px 0;">`;
+                    logBox.scrollTop = logBox.scrollHeight;
+
+                    await new Promise(resolve => setTimeout(resolve, 7000));
+                }
+            }
+
+            logBox.innerHTML += `<br><strong style="color:#ff3333">All attempts on ${platform} are completed. No successful breach.</strong>`;
+            progress.style.width = '100%';
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            progressBar.classList.add('hidden');
+            runButton.disabled = true;
+            validateInputs();
+        });
+    </script>
 </body>
 </html>
-
-
-
-
