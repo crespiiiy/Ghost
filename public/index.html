@@ -51,7 +51,7 @@
             0% { top: 0; }
             100% { top: 100%; }
         }
-        .input-field, .select-field, .file-field {
+        .input-field, .select-field, .textarea-field {
             background: #101010;
             border: 1px solid #0f0;
             padding: 12px;
@@ -60,8 +60,13 @@
             color: #0f0;
             font-size: 0.9rem;
             transition: all 0.3s;
+            font-family: 'Share Tech Mono', monospace;
         }
-        .input-field:focus, .select-field:focus, .file-field:focus {
+        .textarea-field {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .input-field:focus, .select-field:focus, .textarea-field:focus {
             outline: none;
             box-shadow: 0 0 15px #00ff00;
             border-color: #33ff33;
@@ -155,7 +160,7 @@
             .glitch-title {
                 font-size: 1.5rem;
             }
-            .input-field, .select-field, .file-field {
+            .input-field, .select-field, .textarea-field {
                 font-size: 0.8rem;
                 padding: 8px;
             }
@@ -206,13 +211,15 @@
                         <option value="list">Multi-Target Payload</option>
                     </select>
                 </div>
+
+
                 <div id="singleAccount" class="hidden">
                     <label class="block mb-2 text-sm">Target Identifier (Email/ID):</label>
                     <input type="text" id="accountInput" class="input-field" placeholder="target@platform.com">
                 </div>
                 <div id="accountList" class="hidden">
-                    <label class="block mb-2 text-sm">Upload Target Payload (.txt):</label>
-                    <input type="file" id="accountFile" accept=".txt" class="file-field">
+                    <label class="block mb-2 text-sm">Paste Target Payload (Emails, one per line):</label>
+                    <textarea id="accountText" class="textarea-field" placeholder="email1@domain.com&#10;email2@domain.com"></textarea>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm">Credential Injection Mode:</label>
@@ -226,8 +233,8 @@
                     <input type="text" id="passwordInput" class="input-field" placeholder="credential123">
                 </div>
                 <div id="passwordList" class="hidden">
-                    <label class="block mb-2 text-sm">Upload Credential Payload (.txt):</label>
-                    <input type="file" id="passwordFile" accept=".txt" class="file-field">
+                    <label class="block mb-2 text-sm">Paste Credential Payload (Passwords, one per line):</label>
+                    <textarea id="passwordText" class="textarea-field" placeholder="password1&#10;password2"></textarea>
                 </div>
                 <div class="progress-bar hidden" id="progressBar">
                     <div class="progress" id="progress"></div>
@@ -272,20 +279,20 @@
             const hackType = document.getElementById('hackType').value;
             const passwordType = document.getElementById('passwordType').value;
             const accountInput = document.getElementById('accountInput').value.trim();
-            const accountFile = document.getElementById('accountFile').files[0];
+            const accountText = document.getElementById('accountText').value.trim();
             const passwordInput = document.getElementById('passwordInput').value.trim();
-            const passwordFile = document.getElementById('passwordFile').files[0];
+            const passwordText = document.getElementById('passwordText').value.trim();
             const runButton = document.getElementById('runButton');
 
             let isValid = false;
             if (hackType === 'single' && passwordType === 'single') {
                 isValid = accountInput && passwordInput;
             } else if (hackType === 'single' && passwordType === 'list') {
-                isValid = accountInput && passwordFile;
+                isValid = accountInput && passwordText;
             } else if (hackType === 'list' && passwordType === 'single') {
-                isValid = accountFile && passwordInput;
+                isValid = accountText && passwordInput;
             } else if (hackType === 'list' && passwordType === 'list') {
-                isValid = accountFile && passwordFile;
+                isValid = accountText && passwordText;
             }
 
             runButton.disabled = !isValid;
@@ -294,39 +301,8 @@
         // Add input listeners for validation
         document.getElementById('accountInput').addEventListener('input', validateInputs);
         document.getElementById('passwordInput').addEventListener('input', validateInputs);
-        document.getElementById('accountFile').addEventListener('change', function () {
-            validateFile(this, 'account');
-            validateInputs();
-        });
-        document.getElementById('passwordFile').addEventListener('change', function () {
-            validateFile(this, 'password');
-            validateInputs();
-        });
-
-        // File validation
-        function validateFile(input, type) {
-            const logBox = document.getElementById('logBox');
-            const file = input.files[0];
-            if (file) {
-                if (!file.name.endsWith('.txt')) {
-                    logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Invalid ${type} file format. Please upload a .txt file.</div>`;
-                    input.value = ''; // Clear invalid file
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        // Read file content
-        async function readFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsText(file);
-            });
-        }
+        document.getElementById('accountText').addEventListener('input', validateInputs);
+        document.getElementById('passwordText').addEventListener('input', validateInputs);
 
         // Platform-specific log messages
         const platformMessages = {
@@ -371,22 +347,15 @@
                     }
                     accounts.push(account);
                 } else {
-                    const file = document.getElementById('accountFile').files[0];
-                    if (!file) {
-                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Please upload a target payload file (.txt).</div>`;
-                        runButton.disabled = false;
-                        progressBar.classList.add('hidden');
-                        return;
-                    }
-                    const text = await readFile(file);
+                    const text = document.getElementById('accountText').value.trim();
                     accounts = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
                     if (accounts.length === 0) {
-                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Account file is empty.</div>`;
+                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Please enter at least one email.</div>`;
                         runButton.disabled = false;
                         progressBar.classList.add('hidden');
                         return;
                     }
-                    logBox.innerHTML += `<div class="log-entry">Account list uploaded: ${accounts.length} entries</div>`;
+                    logBox.innerHTML += `<div class="log-entry">Account list provided: ${accounts.length} entries</div>`;
                 }
 
                 if (passwordType === 'single') {
@@ -399,25 +368,18 @@
                     }
                     passwords.push(password);
                 } else {
-                    const file = document.getElementById('passwordFile').files[0];
-                    if (!file) {
-                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Please upload a credential payload file (.txt).</div>`;
-                        runButton.disabled = false;
-                        progressBar.classList.add('hidden');
-                        return;
-                    }
-                    const text = await readFile(file);
+                    const text = document.getElementById('passwordText').value.trim();
                     passwords = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
                     if (passwords.length === 0) {
-                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Password file is empty.</div>`;
+                        logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Please enter at least one password.</div>`;
                         runButton.disabled = false;
                         progressBar.classList.add('hidden');
                         return;
                     }
-                    logBox.innerHTML += `<div class="log-entry">Password list uploaded: ${passwords.length} entries</div>`;
+                    logBox.innerHTML += `<div class="log-entry">Password list provided: ${passwords.length} entries</div>`;
                 }
             } catch (error) {
-                logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Failed to read file - ${error.message}. Please try again.</div>`;
+                logBox.innerHTML += `<div class="log-entry" style="color:#ff3333">Error: Failed to process input - ${error.message}. Please try again.</div>`;
                 runButton.disabled = false;
                 progressBar.classList.add('hidden');
                 return;
@@ -428,7 +390,7 @@
                 audio.play();
             }, 3000);
 
-            const totalAttempts = accounts.length * passwords.length;
+            const összesAttempts = accounts.length * passwords.length;
             let currentAttempt = 0;
             let successCount = 0;
             let failedCount = 0;
@@ -442,7 +404,7 @@
                 while (passwordIndex < passwords.length && successCount < maxSuccesses) {
                     const password = passwords[passwordIndex];
                     currentAttempt++;
-                    const progressPercentage = (currentAttempt / totalAttempts) * 100;
+                    const progressPercentage = (currentAttempt / összesAttempts) * 100;
                     progress.style.width = `${progressPercentage}%`;
 
                     const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
@@ -484,12 +446,12 @@
             }
 
             // Process remaining attempts as failures if successCount < maxSuccesses
-            while (currentAccountIndex < accounts.length && currentAttempt < totalAttempts) {
+            while (currentAccountIndex < accounts.length && currentAttempt < összesAttempts) {
                 const account = accounts[currentAccountIndex];
-                for (let i = 0; i < passwords.length && currentAttempt < totalAttempts; i++) {
+                for (let i = 0; i < passwords.length && currentAttempt < összesAttempts; i++) {
                     const password = passwords[i];
                     currentAttempt++;
-                    const progressPercentage = (currentAttempt / totalAttempts) * 100;
+                    const progressPercentage = (currentAttempt / összesAttempts) * 100;
                     progress.style.width = `${progressPercentage}%`;
 
                     const message = platformMessages[platform][Math.floor(Math.random() * platformMessages[platform].length)];
@@ -500,7 +462,7 @@
                     logBox.scrollTop = logBox.scrollHeight;
 
                     await new Promise(resolve => setTimeout(resolve, 7000));
-                    }
+                }
                 currentAccountIndex++;
                 if (currentAccountIndex < accounts.length) {
                     logBox.innerHTML += `<div class="log-entry">Switching to next target: <b>${accounts[currentAccountIndex]}</b></div>`;
